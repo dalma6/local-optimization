@@ -51,15 +51,16 @@ def t_error(t):
 
 lexer = lex.lex(debug=0)
 
+
 test_data = '''
 a_1 := x + y 
 IFFALSE x GOTO 4
 b := 3 - y 
 c := 2 * y 
 IF c > 0 GOTO 9
-d := a + c
-'''
+d := a + c'''
 
+'''
 lexer.input(test_data)
 
 while True:
@@ -68,6 +69,5 @@ while True:
         break     
     print(tok)
 
-
-
+'''
 

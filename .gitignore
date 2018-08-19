@@ -106,3 +106,7 @@ venv.bak/
 
 # My editor
 .DS_Store
+
+# Library
+*.out
+parsetab.py
