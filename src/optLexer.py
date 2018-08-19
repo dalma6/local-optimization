@@ -1,6 +1,4 @@
-import sys
-sys.path.insert(0, "./libraries")
-import lex as lex
+import libraries.lex as lex
 
 
 reserved = (
