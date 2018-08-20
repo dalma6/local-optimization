@@ -1,3 +1,5 @@
+from basicBlock import BasicBlock
+
 def fetchInstructions(fileName):
   
     try: 
@@ -28,23 +30,22 @@ def getLeaders(instructions):
 
 def instanceBasicBlocks(instructions):
     leaders = getLeaders(instructions)
+    basicBlocks = []
 
     for instruction in instructions:
         if leaders.__contains__(instruction):
-            print("---------")
-            print(instruction)
-        else:
-            print(instruction)
-    print("----------")
+            basicBlocks.append(BasicBlock(instruction))
+        basicBlocks[-1].addInstruction(instruction)
 
-# TODO: napraviti sad klasu za bazicni blok umesto da radim ovo.
+    return basicBlocks
 
 
 def main():
     fileName = 'test/test1.txt'
     instructions = fetchInstructions(fileName)
-    instanceBasicBlocks(instructions)
-
-
+    blocks = instanceBasicBlocks(instructions)
+    for block in blocks:
+        print block
+    
 if __name__ == "__main__":
     main()
