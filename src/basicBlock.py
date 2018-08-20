@@ -10,7 +10,7 @@ class BasicBlock:
         return self.instructions
     
     def getLead(self):
-        return self.instructions
+        return self.lead
 
     def __str__(self):
         str = "-----------\n"

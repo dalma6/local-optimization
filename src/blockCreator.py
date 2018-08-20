@@ -39,13 +39,20 @@ def instanceBasicBlocks(instructions):
 
     return basicBlocks
 
+def optimizeBlock(block):
+    #TODO: ovde treba da se npr proveri sa yacc i to. I da se vidi kako da se optimizuje 
+    # mozda prolazak kroz svaku instrukciju parserom moze dati neki info dal imamo neki od slucajeva kad se 
+    # vrsi lokalna optimizacija? Tako nesto... :) 
+
+    return block
+
 
 def main():
     fileName = 'test/test1.txt'
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
     for block in blocks:
-        print block
+        print optimizeBlock(block)
     
 if __name__ == "__main__":
     main()
