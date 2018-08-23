@@ -43,6 +43,8 @@ def optimizeBlock(block):
     #TODO: ovde treba da se npr proveri sa yacc i to. I da se vidi kako da se optimizuje 
     # mozda prolazak kroz svaku instrukciju parserom moze dati neki info dal imamo neki od slucajeva kad se 
     # vrsi lokalna optimizacija? Tako nesto... :) 
+    
+    # Vazi, to cu ja napraviti kad pokrenm sve i vidim kako tacno izgleda svaki blok.
 
     return block
 
