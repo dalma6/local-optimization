@@ -15,7 +15,7 @@ tokens = reserved + (
    'LGT'
 ) 
 
-literals = ['=', '+', '-', '*', '/', '(', ')']
+literals = ['=', '+', '-', '*', '/', '(', ')', '^']
 
 def t_NUMBER(t):
     r'\d+'
@@ -33,7 +33,7 @@ def t_ID(t):
     return t
 
 def t_LGT(t):
-    r'(<=)|(>=)|[<>]'
+    r'(<=)|(>=)|[<>]|(==)'
     return t
 
 t_ignore = " \t"
