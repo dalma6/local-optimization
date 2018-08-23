@@ -17,7 +17,6 @@ tokens = reserved + (
 
 literals = ['=', '+', '-', '*', '/', '(', ')']
 
-
 def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)    
@@ -43,14 +42,13 @@ def t_newline(t):
     r'\n+'
     t.lexer.lineno += t.value.count("\n")
 
-
+# Leksicka greska bi trebalo da prekine program, zar ne?
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
-
+    #t.lexer.skip(1)
+	exit()
 
 lexer = lex.lex(debug=0)
-
 
 test_data = '''
 a_1 := x + y 
@@ -63,6 +61,7 @@ d := a + c'''
 '''
 lexer.input(test_data)
 
+Gde cemo ovde proveriti da li je ulaz ispravan i zvati gresku?
 while True:
     tok = lexer.token()
     if not tok: 
@@ -70,4 +69,3 @@ while True:
     print(tok)
 
 '''
-
