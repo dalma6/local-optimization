@@ -106,6 +106,7 @@ venv.bak/
 
 # My editor
 .DS_Store
+.vscode
 
 # Library
 *.out

@@ -50,7 +50,7 @@ def optimizeBlock(block):
 
 
 def main():
-    fileName = 'test/test1.txt'
+    fileName = 'test/test_examples/test1.txt'
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
     for block in blocks:

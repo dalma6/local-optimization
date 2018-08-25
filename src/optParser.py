@@ -1,6 +1,6 @@
 import libraries.yacc as yacc
 import optLexer as lexer
-from ArithmeticError import ZeroDivisionError
+#from ArithmeticError import ZeroDivisionError
 
 
 tokens = lexer.tokens
@@ -70,11 +70,12 @@ def p_expression_binop(p):
     elif p[2] == '*':
          p[0] = ('mul', p[1] ,'*' ,p[3])
     elif p[2] == '/':
-		if p[3] == '0':
-			raise ZeroDivisionError
-			return
-        p[0] = ('div', p[1] ,'/' ,p[3])
-
+        try:
+            a = p[1] / p[3]
+            p[0] = ('div', p[1] ,'/' ,p[3])
+        except ZeroDivisionError:
+            print("Division by 0")
+            
 def p_expression_uminus(p):
     "expression : '-' expression %prec UMINUS"
     p[0] = -p[2]
