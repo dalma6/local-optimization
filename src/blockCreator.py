@@ -8,7 +8,9 @@ def fetchInstructions(fileName):
         with open(fileName, 'r') as f:
             instructions = []
             for line in f:
-                instructions.append(line.rstrip('\n').rstrip(' '))
+                inst = line.rstrip('\n').rstrip(' ')
+                if(inst):
+                    instructions.append(inst)
         return instructions
     except IOError as e:
         exit(e)
@@ -41,12 +43,55 @@ def instanceBasicBlocks(instructions):
 
     return basicBlocks
 
+def toCode(instr):
+    if(instr[0] == "assign"):
+        if(len(instr[3]) == 3 ):
+            [operator , left, right ] = instr[3]
+            return instr[1] + " " + instr[2] + " " + str(left[1]) + " " +  operator +  " " + str(right[1])
+        elif(len(instr[3]) == 2):
+            return instr[1] + " " + instr[2] + " " + str(instr[3][1])
+
+def neutralElimination(tmp):
+    if(len(tmp[3]) == 3 ):    
+        [ operator, left, right ] = tmp[3]
+        res = tmp[3]
+        if operator == '+':
+            if left[1] == 0:
+                res = right
+            elif right[1] == 0:
+                res = left
+        elif operator == '*':
+            if left[1] == 0 or right[1] == 0:
+                res = ('const', 0)
+            elif left[1] == 1:
+                res = right
+            elif right[1] == 0:
+                res = right  
+        return (tmp[0],tmp[1],tmp[2],res)
+    else:
+        return tmp
+
+def constantFolding(tmp):
+    if(len(tmp[3]) == 3 ): 
+        [operator, left, right ] = tmp[3]
+        res = tmp[3]
+        if(left[0] == "const" and right[0] == "const"):
+            if operator == "+":
+                res = left[1] + right[1]
+            elif operator == '-':
+                res = left[1] - right[1]
+            elif operator == '*':
+                res = left[1] * right[1]
+            elif operator == '/':
+                res = left[1] / right[1]
+            return (tmp[0],tmp[1],tmp[2],("const", res))
+        else:
+            return tmp
+    else:
+        return tmp
+   
+
 def optimizeBlock(block):
-    #TODO: ovde treba da se npr proveri sa yacc i to. I da se vidi kako da se optimizuje 
-    # mozda prolazak kroz svaku instrukciju parserom moze dati neki info dal imamo neki od slucajeva kad se 
-    # vrsi lokalna optimizacija? Tako nesto... :) 
-    
-    # Vazi, to cu ja napraviti kad pokrenm sve i vidim kako tacno izgleda svaki blok.
 
     blockInstr = []
     blockInstr = block.getInstructions()
@@ -54,20 +99,9 @@ def optimizeBlock(block):
     for i in range(len(blockInstr)):
         tmp = yacc.parse(blockInstr[i])
         if(tmp[0] == "assign"):
-            if(len(tmp[3]) == 3 ):           # u pitanju je binarni operator
-                [operator, operand1, operand2 ] = tmp[3]
-                if(operand1[0] == "const" and operand2[0] == "const"):
-                    if operator == "+":
-                        res = operand1[1] + operand2[1]
-                    elif operator == '-':
-                        res = operand1[1] - operand2[1]
-                    elif operator == '*':
-                        res = operand1[1] * operand2[1]
-                    elif operator == '/':
-                        res = operand1[1] / operand2[1]
-                    blockInstr[i] = tmp[1] + " " + tmp[2] + " " + str(res)
-                
-
+            optimized = constantFolding(neutralElimination(tmp))
+            optCode = toCode(optimized)
+            blockInstr[i] = optCode
     return block
 
 
