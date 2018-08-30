@@ -1,4 +1,6 @@
 from basicBlock import BasicBlock
+import libraries.yacc as yacc
+import optParser
 
 def fetchInstructions(fileName):
   
@@ -45,6 +47,26 @@ def optimizeBlock(block):
     # vrsi lokalna optimizacija? Tako nesto... :) 
     
     # Vazi, to cu ja napraviti kad pokrenm sve i vidim kako tacno izgleda svaki blok.
+
+    blockInstr = []
+    blockInstr = block.getInstructions()
+
+    for i in range(len(blockInstr)):
+        tmp = yacc.parse(blockInstr[i])
+        if(tmp[0] == "assign"):
+            if(len(tmp[3]) == 3 ):           # u pitanju je binarni operator
+                [operator, operand1, operand2 ] = tmp[3]
+                if(operand1[0] == "const" and operand2[0] == "const"):
+                    if operator == "+":
+                        res = operand1[1] + operand2[1]
+                    elif operator == '-':
+                        res = operand1[1] - operand2[1]
+                    elif operator == '*':
+                        res = operand1[1] * operand2[1]
+                    elif operator == '/':
+                        res = operand1[1] / operand2[1]
+                    blockInstr[i] = tmp[1] + " " + tmp[2] + " " + str(res)
+                
 
     return block
 

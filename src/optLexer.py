@@ -4,9 +4,8 @@ import libraries.lex as lex
 reserved = (
     'IF',
     'GOTO',
-    'IFFALSE',
-    'RETURN'
-)
+    'IFFALSE'
+    )
 
 tokens = reserved + (
    'NUMBER',

@@ -15,7 +15,7 @@ names = {}
 
 def p_program(p):
     'program : statement'
-    print(p[1])
+    p[0] = p[1]
 
 def p_statement_if_gotonum(p):
     '''statement : IF condition GOTO NUMBER'''
@@ -64,15 +64,15 @@ def p_expression_binop(p):
                   | expression '*' expression
                   | expression '/' expression'''
     if p[2] == '+':
-        p[0] = ('plus', p[1] ,'+' ,p[3])
+        p[0] = ('+', p[1] , p[3])
     elif p[2] == '-':
-        p[0] = ('minus', p[1] ,'-' ,p[3])
+        p[0] = ('-', p[1] ,p[3])
     elif p[2] == '*':
-         p[0] = ('mul', p[1] ,'*' ,p[3])
+         p[0] = ('*', p[1] ,p[3])
     elif p[2] == '/':
         try:
             a = p[1] / p[3]
-            p[0] = ('div', p[1] ,'/' ,p[3])
+            p[0] = ('/', p[1] ,p[3])
         except ZeroDivisionError:
             print("Division by 0")
             
@@ -86,15 +86,11 @@ def p_expression_group(p):
 
 def p_expression_number(p):
     "expression : NUMBER"
-    p[0] = p[1]
+    p[0] = ("const", p[1])
 
 def p_expression_name(p):
     "expression : ID"
-    try:
-        p[0] = names[p[1]]
-    except LookupError:
-        print("Undefined name '%s'" % p[1])
-        p[0] = 0
+    p[0] = ("id", p[1])
 
 def p_error(p):
     if p:
@@ -103,13 +99,3 @@ def p_error(p):
         print("Syntax error at EOF")
 
 yacc.yacc()
-
-while 1:
-    try:
-        s = raw_input('calc > ')
-    except EOFError:
-        break
-#	A sta ako je s broj 0?
-    if not s:
-        pass
-    yacc.parse(s)
