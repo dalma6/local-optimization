@@ -2,6 +2,14 @@
 
 Local optimizator for 3-adress code.
 
+### :smile: TODO: 
+* promeniti gramatiku tako da prihvata i IF 1 GOTO 12 , to sam zaboravio 
+* izmeniti program tako da ovo radi tj da sve optimizacije rade kako valja
+* uraditi strenght reduction [ ovo je bas malo ostalo, to mogu i ja zavrsiti ] 
+* uraditi constant propagation
+* uraditi redundatne kalkulacije
+
+
 ## :muscle: Example: 
 This example ilustrates how the local optimizator should work
 ```
