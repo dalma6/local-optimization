@@ -112,6 +112,8 @@ def constantFolding(tmp):
                 res = left[1] * right[1]
             elif operator == '/':
                 res = left[1] / right[1]
+            elif operator == '^':
+                res = left[1] ** right[1]
             return (tmp[0],tmp[1],tmp[2],("const", res))
         else:
             return tmp
