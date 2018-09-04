@@ -15,7 +15,8 @@ class BasicBlock:
     def __str__(self):
         str = "-----------\n"
         for instr in self.instructions:
-            str += instr + "\n"
+            if(instr != ""):
+                str += instr + "\n"
         str += "-----------"
         return str
 

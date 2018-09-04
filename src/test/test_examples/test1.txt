@@ -1,6 +1,7 @@
 x := x * 0
 y := 1 * y
-y := y ^ 2 
+y := y ^ 2
+IF 4 < 5 GOTO 18
 y := 2 * x     
 x := x * 8
 IF x >= 9 GOTO 8            
@@ -11,5 +12,7 @@ IF x > 9 GOTO 11
 z := y
 z := 2 - 1
 Z := 11
+IF 2 > 3 GOTO 17
 y := 1 * Z
 z := z + 0
+x := 3 + 4

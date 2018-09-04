@@ -47,14 +47,16 @@ def p_condition_id(p):
 
     try:
         if type(p[1]) is int:
-            first = p[1]
+            first = ('const', p[1])
         else:
-            first = names[p[1]]
+            first = ('id', p[1])
         if type(p[3]) is int:
-            third = p[3]
+            third = ('const', p[3])
         else:
-            third = names[p[3]]
-        p[0] = ('condition', first, p[2], third)
+            #third = names[p[3]]
+            third = ('id', p[3])
+
+        p[0] = (p[2], first, third)
     except LookupError:
         print("Undefined name '%s'" % p[1])
         p[0]= 0

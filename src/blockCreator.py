@@ -50,6 +50,17 @@ def toCode(instr):
             return instr[1] + " " + instr[2] + " " + str(left[1]) + " " +  operator +  " " + str(right[1])
         elif(len(instr[3]) == 2):
             return instr[1] + " " + instr[2] + " " + str(instr[3][1])
+    if(instr[0] == "IF"):
+        if(isinstance(instr[1],bool)):
+            if instr[1] == False:
+                return ""
+            elif instr[1] == True:
+                return "GOTO " + str(instr[2])
+        else:
+            [op, left,right] = instr[1]
+            condition =  str(left[1]) + " " +  op +  " " + str(right[1]) 
+            return "IF " +condition +  " GOTO " + str(instr[2])
+
 
 def neutralElimination(tmp):
     if(len(tmp[3]) == 3 ):    
@@ -72,7 +83,24 @@ def neutralElimination(tmp):
         return tmp
 
 def constantFolding(tmp):
-    if(len(tmp[3]) == 3 ): 
+
+    if(len(tmp) == 3 and len(tmp[1]) == 3):
+        [operator, left ,right] = tmp[1]
+        res = tmp[1]
+        if(left[0] == "const" and right[0] == "const"):
+            if operator == '>':
+                res = left[1] > right[1]
+            elif operator == '<':
+                res = left[1] < right[1]
+            elif operator == '>=':
+                res = left[1] >= right[1]
+            elif operator == '<=':
+                res = left[1] <= right[1]
+            elif operator == '==' :
+                res = left[1] == right[1]
+        return (tmp[0], res, tmp[2])
+
+    if(len(tmp) > 3 and len(tmp[3]) == 3 ): 
         [operator, left, right ] = tmp[3]
         res = tmp[3]
         if(left[0] == "const" and right[0] == "const"):
@@ -102,6 +130,11 @@ def optimizeBlock(block):
             optimized = constantFolding(neutralElimination(tmp))
             optCode = toCode(optimized)
             blockInstr[i] = optCode
+        if(tmp[0] == "IF"):
+            optimized = constantFolding(tmp)
+            optCode = toCode(optimized)
+            blockInstr[i] = optCode
+            
     return block
 
 
@@ -110,7 +143,7 @@ def main():
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
     for block in blocks:
-        print optimizeBlock(block)
+        print(optimizeBlock(block))
     
 if __name__ == "__main__":
     main()
