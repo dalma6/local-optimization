@@ -1,3 +1,5 @@
+import math
+
 from basicBlock import BasicBlock
 import libraries.yacc as yacc
 import optParser
@@ -126,11 +128,32 @@ def constantFolding(tmp):
                 res = left[1] / right[1]
             elif operator == '^':
                 res = left[1] ** right[1]
-            return (tmp[0], tmp[1], tmp[2],("const", res))
+            return (tmp[0], tmp[1], tmp[2], ("const", res))
         else:
             return tmp
     else:
         return tmp
+
+# vrv ne radi za sad
+def strengthReduction(tmp):
+	[operator, left, right] = tmp[3]
+        res = tmp[3]
+    # samo do 2, vidi se poenta a i trebalo bi da se menja cela struktura 
+    if right[0] == 'const':
+		if operator == '^' and right[1] == 2:
+			operator = '*'
+			right[1] = left[1]
+			res = left[1] * left[1]
+		elif operator == '*' and isPerfectPower(right[1], 2):
+			operator = '<<'
+			right[1] = math.log(right[1], 2)
+		elif operator == '*' and isPerfectPower(right[1], 3):
+			operator = '<<'
+			right[1] = math.log(right[1], 3)
+		tmp[0] = operator
+		tmp[1] = left[1]
+		tmp[2] = right[1]
+		return (tmp[0], tmp[1], tmp[2])
    
 def optimizeBlock(block):
     blockInstr = []
@@ -146,9 +169,14 @@ def optimizeBlock(block):
             optimized = constantFolding(tmp)
             optCode = toCode(optimized)
             blockInstr[i] = optCode
-            
     return block
 
+def isPerfectPower(a, b):
+  while a % b == 0:
+    a = a / b
+  if a == 1:
+    return True
+  return False
 
 def main():
     fileName = 'test/test_examples/test1.txt'

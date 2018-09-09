@@ -66,21 +66,27 @@ def p_expression_binop(p):
                   | expression '-' expression
                   | expression '*' expression
                   | expression '^' expression
-                  | expression '/' expression'''
+                  | expression '/' expression
+                  | expression '<<' expression
+                  | expression '>>' expression'''
     if p[2] == '+':
-        p[0] = ('+', p[1] , p[3])
+        p[0] = ('+', p[1], p[3])
     elif p[2] == '-':
-        p[0] = ('-', p[1] ,p[3])
+        p[0] = ('-', p[1], p[3])
     elif p[2] == '*':
-         p[0] = ('*', p[1] ,p[3])
+         p[0] = ('*', p[1], p[3])
     elif p[2] == '^':
-         p[0] = ('^', p[1] ,p[3])
+         p[0] = ('^', p[1], p[3])
     elif p[2] == '/':
         try:
             a = p[1] / p[3]
             p[0] = ('/', p[1] ,p[3])
         except ZeroDivisionError:
             print("Division by 0")
+    elif p[2] == '<<':
+		p[0] = ('<<', p[1], p[3])
+	elif p[2] == '>>':
+		p[0] = ('>>', p[1], p[3])
             
 def p_expression_uminus(p):
     "expression : '-' expression %prec UMINUS"
