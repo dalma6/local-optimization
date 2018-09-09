@@ -3,7 +3,6 @@ import libraries.yacc as yacc
 import optParser
 
 def fetchInstructions(fileName):
-  
     try: 
         with open(fileName, 'r') as f:
             instructions = []
@@ -63,29 +62,42 @@ def toCode(instr):
 
 
 def neutralElimination(tmp):
-    if(len(tmp[3]) == 3 ):    
-        [ operator, left, right ] = tmp[3]
+    if(len(tmp[3]) == 3):    
+        [operator, left, right] = tmp[3]
         res = tmp[3]
         if operator == '+':
             if left[1] == 0:
                 res = right
             elif right[1] == 0:
                 res = left
+        # dodato
+        elif operator == '-':
+			if left[1] == 0:
+				res = -right
+			elif right[1] == 0:
+				res = left
         elif operator == '*':
             if left[1] == 0 or right[1] == 0:
                 res = ('const', 0)
             elif left[1] == 1:
                 res = right
-            elif right[1] == 0:
-                res = right  
-        return (tmp[0],tmp[1],tmp[2],res)
+            # ovo sam promenila -- pisalo je elif right[1] == 0 (vec provereno); res = right(vec uradjeno gore)
+            # mislim da si hteo ovo -- ako je desni umnozak 1, da je rezultat levi umnozak
+            elif right[1] == 1:
+                res = left
+        # dodato        
+        elif operator == '/':
+			if right[1] == 1:
+				res = left
+			elif left[1] == 0:
+				res = ('const', 0)
+        return (tmp[0], tmp[1], tmp[2], res)
     else:
         return tmp
 
 def constantFolding(tmp):
-
     if(len(tmp) == 3 and len(tmp[1]) == 3):
-        [operator, left ,right] = tmp[1]
+        [operator, left, right] = tmp[1]
         res = tmp[1]
         if(left[0] == "const" and right[0] == "const"):
             if operator == '>':
@@ -100,8 +112,8 @@ def constantFolding(tmp):
                 res = left[1] == right[1]
         return (tmp[0], res, tmp[2])
 
-    if(len(tmp) > 3 and len(tmp[3]) == 3 ): 
-        [operator, left, right ] = tmp[3]
+    if(len(tmp) > 3 and len(tmp[3]) == 3): 
+        [operator, left, right] = tmp[3]
         res = tmp[3]
         if(left[0] == "const" and right[0] == "const"):
             if operator == "+":
@@ -114,15 +126,13 @@ def constantFolding(tmp):
                 res = left[1] / right[1]
             elif operator == '^':
                 res = left[1] ** right[1]
-            return (tmp[0],tmp[1],tmp[2],("const", res))
+            return (tmp[0], tmp[1], tmp[2],("const", res))
         else:
             return tmp
     else:
         return tmp
    
-
 def optimizeBlock(block):
-
     blockInstr = []
     blockInstr = block.getInstructions()
 
