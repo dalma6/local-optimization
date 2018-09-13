@@ -1,11 +1,36 @@
 import math
-
 from basicBlock import BasicBlock
 import libraries.yacc as yacc
+from  indicators import *
 import optParser
 
+def printExpr(expr):
+    if(isBinary(expr)):
+        return printExpr(expr[1]) +  " " + expr[0] +  " " + printExpr(expr[2])
+    if(isUnary(expr)):
+        return expr[0] +  printExpr(expr[1])
+    if(isConst):
+        return str(expr[1])
+    if(isId):
+        return expr[1]
+
+def toCode(instr):
+    if(instr[0] == ":="):
+        return instr[1] + " := " + printExpr(instr[2])
+    if(instr[0] == "IF"):
+        if(isinstance(instr[1], bool)):
+            if instr[1] == False:
+                return ""
+            elif instr[1] == True:
+                return "GOTO " + str(instr[2])
+        else:
+            [op, left, right] = instr[1]
+            condition = str(left[1]) + " " + op + " " + str(right[1])
+            return "IF " + condition + " GOTO " + str(instr[2])
+
+
 def fetchInstructions(fileName):
-    try: 
+    try:
         with open(fileName, 'r') as f:
             instructions = []
             for line in f:
@@ -16,13 +41,14 @@ def fetchInstructions(fileName):
     except IOError as e:
         exit(e)
 
+
 def getLeaders(instructions):
     leaders = []
     leaders.append(instructions[0])
-    
+
     for i in range(len(instructions)):
         if(instructions[i].__contains__("GOTO")):
-            
+
             if((i+1) != len(instructions)):
                 leaders.append(instructions[i+1])
             try:
@@ -32,6 +58,7 @@ def getLeaders(instructions):
                 exit(e)
 
     return list(set(leaders))
+
 
 def instanceBasicBlocks(instructions):
     leaders = getLeaders(instructions)
@@ -44,60 +71,51 @@ def instanceBasicBlocks(instructions):
 
     return basicBlocks
 
-def toCode(instr):
-    if(instr[0] == "assign"):
-        if(len(instr[3]) == 3 ):
-            [operator , left, right ] = instr[3]
-            return instr[1] + " " + instr[2] + " " + str(left[1]) + " " +  operator +  " " + str(right[1])
-        elif(len(instr[3]) == 2):
-            return instr[1] + " " + instr[2] + " " + str(instr[3][1])
-    if(instr[0] == "IF"):
-        if(isinstance(instr[1],bool)):
-            if instr[1] == False:
-                return ""
-            elif instr[1] == True:
-                return "GOTO " + str(instr[2])
-        else:
-            [op, left,right] = instr[1]
-            condition =  str(left[1]) + " " +  op +  " " + str(right[1]) 
-            return "IF " +condition +  " GOTO " + str(instr[2])
 
-
-def neutralElimination(tmp):
-    if(len(tmp[3]) == 3):    
-        [operator, left, right] = tmp[3]
-        res = tmp[3]
+def neutralElimination(instr):
+    if(isAssigment(instr) and isBinary(instr[2])):
+        res = instr[2]
+        [operator , left, right] = instr[2]
         if operator == '+':
-            if left[1] == 0:
+            if(isValue(left,0)):
                 res = right
-            elif right[1] == 0:
+            elif (isValue(right,0)):
                 res = left
-        # dodato
         elif operator == '-':
-			if left[1] == 0:
-				res = -right
-			elif right[1] == 0:
-				res = left
-        elif operator == '*':
-            if left[1] == 0 or right[1] == 0:
-                res = ('const', 0)
-            elif left[1] == 1:
-                res = right
-            # ovo sam promenila -- pisalo je elif right[1] == 0 (vec provereno); res = right(vec uradjeno gore)
-            # mislim da si hteo ovo -- ako je desni umnozak 1, da je rezultat levi umnozak
-            elif right[1] == 1:
+            if(isValue(right,0)) :
                 res = left
-        # dodato        
+            elif (isValue(left,0)):
+                if(isConst(right)):
+                    res = ("const", -right[1])
+                elif(isUnary(right)):
+                    res = right[1]
+                elif(isId(right)):
+                    res = ("-", right)
+        elif operator == '*':
+            if (isValue(left,0) or isValue(right,0)):
+                res = ('const', 0)
+            elif isValue(left,1):
+                res = right
+            elif isValue(right,1):
+                res = left
         elif operator == '/':
-			if right[1] == 1:
-				res = left
-			elif left[1] == 0:
-				res = ('const', 0)
-        return (tmp[0], tmp[1], tmp[2], res)
-    else:
-        return tmp
+            if isValue(right,1):
+                res = left
+            elif isValue(left,0):
+                res = ('const', 0)
+        elif operator == '^':
+            if isValue(right,1):
+                res = left
+            elif isValue(right,0):
+                res = ('const',1)
+            elif isValue(left,1):
+                res = ('const',1)
+        return (instr[0], instr[1], res)
+    return instr
 
-def constantFolding(tmp):
+
+def constantFolding(instr):
+    '''
     if(len(tmp) == 3 and len(tmp[1]) == 3):
         [operator, left, right] = tmp[1]
         res = tmp[1]
@@ -110,80 +128,80 @@ def constantFolding(tmp):
                 res = left[1] >= right[1]
             elif operator == '<=':
                 res = left[1] <= right[1]
-            elif operator == '==' :
+            elif operator == '==':
                 res = left[1] == right[1]
         return (tmp[0], res, tmp[2])
-
-    if(len(tmp) > 3 and len(tmp[3]) == 3): 
-        [operator, left, right] = tmp[3]
-        res = tmp[3]
-        if(left[0] == "const" and right[0] == "const"):
+    '''
+    if(isAssigment(instr) and isBinary(instr[2])):
+        [operator, left, right] = instr[2]
+        if(isConst(left) and isConst(right)):
             if operator == "+":
-                res = left[1] + right[1]
+                val = left[1] + right[1]
             elif operator == '-':
-                res = left[1] - right[1]
+                val = left[1] - right[1]
             elif operator == '*':
-                res = left[1] * right[1]
+                val = left[1] * right[1]
             elif operator == '/':
-                res = left[1] / right[1]
+                val = left[1] / right[1]
             elif operator == '^':
-                res = left[1] ** right[1]
-            return (tmp[0], tmp[1], tmp[2], ("const", res))
-        else:
-            return tmp
-    else:
-        return tmp
+                val = left[1] ** right[1]
+            return (instr[0], instr[1], ("const", val))
+    return instr
 
-# vrv ne radi za sad
+
+'''
 def strengthReduction(tmp):
-	[operator, left, right] = tmp[3]
-        res = tmp[3]
-    # samo do 2, vidi se poenta a i trebalo bi da se menja cela struktura 
+    [operator, left, right] = tmp[3]
+    res = tmp[3]
     if right[0] == 'const':
-		if operator == '^' and right[1] == 2:
-			operator = '*'
-			right[1] = left[1]
-			res = left[1] * left[1]
-		elif operator == '*' and isPerfectPower(right[1], 2):
-			operator = '<<'
-			right[1] = math.log(right[1], 2)
-		elif operator == '*' and isPerfectPower(right[1], 3):
-			operator = '<<'
-			right[1] = math.log(right[1], 3)
-		tmp[0] = operator
-		tmp[1] = left[1]
-		tmp[2] = right[1]
-		return (tmp[0], tmp[1], tmp[2])
-   
+        if operator == '^' and right[1] == 2:
+            operator = '*'
+            right[1] = left[1]
+            res = left[1] * left[1]
+        elif operator == '*' and isPerfectPower(right[1], 2):
+            operator = '<<'
+            right[1] = math.log(right[1], 2)
+        elif operator == '*' and isPerfectPower(right[1], 3):
+            operator = '<<'
+            right[1] = math.log(right[1], 3)
+        tmp[0] = operator
+        tmp[1] = left[1]
+        tmp[2] = right[1]
+        return (tmp[0], tmp[1], tmp[2])
+'''
+
+
 def optimizeBlock(block):
     blockInstr = []
     blockInstr = block.getInstructions()
 
     for i in range(len(blockInstr)):
         tmp = yacc.parse(blockInstr[i])
-        if(tmp[0] == "assign"):
-            optimized = constantFolding(neutralElimination(tmp))
-            optCode = toCode(optimized)
-            blockInstr[i] = optCode
+        optimized = constantFolding(tmp)
+        optCode = toCode(optimized)
+        blockInstr[i] = optCode
+        '''
         if(tmp[0] == "IF"):
-            optimized = constantFolding(tmp)
-            optCode = toCode(optimized)
-            blockInstr[i] = optCode
+            #optimized = constantFolding(tmp)
+            #optCode = toCode(optimized)
+            #blockInstr[i] = optCode
+        '''
     return block
 
+
 def isPerfectPower(a, b):
-  while a % b == 0:
-    a = a / b
-  if a == 1:
-    return True
-  return False
+    while a % b == 0:
+        a = a / b
+    if a == 1:
+        return True
+    return False
+
 
 def main():
-    fileName = 'test/test_examples/test1.txt'
+    fileName = 'test/test_examples/testNeutralElimination.txt'
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
     for block in blocks:
         print(optimizeBlock(block))
-    
 if __name__ == "__main__":
     main()
