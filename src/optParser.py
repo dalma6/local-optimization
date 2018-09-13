@@ -40,11 +40,13 @@ def p_statement_assign(p):
     names[p[1]] = p[3]
     p[0] = (':=', p[1], p[3])
 
+
 '''
 def p_statement_expr(p):
     'statement : expression'
     p[0] = p[1]
 '''
+
 
 def p_condition_id(p):
     '''condition : ID LGT NUMBER
@@ -82,16 +84,17 @@ def p_expression_binop(p):
     elif p[2] == '-':
         p[0] = ('-', p[1], p[3])
     elif p[2] == '*':
-         p[0] = ('*', p[1], p[3])
+        p[0] = ('*', p[1], p[3])
     elif p[2] == '^':
-         p[0] = ('^', p[1], p[3])
+        p[0] = ('^', p[1], p[3])
     elif p[2] == '/':
         p[0] = ('/', p[1], p[3])
     elif p[2] == '<<':
         p[0] = ('<<', p[1], p[3])
     elif p[2] == '>>':
         p[0] = ('>>', p[1], p[3])
-            
+
+
 def p_expression_uminus(p):
     "expression : '-' expression %prec UMINUS"
     if(p[2][0] == "const"):
@@ -99,22 +102,27 @@ def p_expression_uminus(p):
     else:
         p[0] = ('-', p[2])
 
+
 def p_expression_group(p):
     "expression : '(' expression ')'"
     p[0] = p[2]
+
 
 def p_expression_number(p):
     "expression : NUMBER"
     p[0] = ("const", p[1])
 
+
 def p_expression_name(p):
     "expression : ID"
     p[0] = ("id", p[1])
+
 
 def p_error(p):
     if p:
         print("Syntax error at '%s'" % p.value)
     else:
         print("Syntax error at EOF")
+
 
 yacc.yacc()

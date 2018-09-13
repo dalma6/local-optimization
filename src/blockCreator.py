@@ -1,32 +1,32 @@
 import math
 from basicBlock import BasicBlock
 import libraries.yacc as yacc
-from  indicators import *
+from indicators import *
 import optParser
+
 
 def printExpr(expr):
     if(isBinary(expr)):
-        return printExpr(expr[1]) +  " " + expr[0] +  " " + printExpr(expr[2])
+        return printExpr(expr[1]) + " " + expr[0] + " " + printExpr(expr[2])
     if(isUnary(expr)):
-        return expr[0] +  printExpr(expr[1])
+        return expr[0] + printExpr(expr[1])
     if(isConst):
         return str(expr[1])
     if(isId):
         return expr[1]
 
+
 def toCode(instr):
-    if(instr[0] == ":="):
+    if(isAssigment(instr)):
         return instr[1] + " := " + printExpr(instr[2])
-    if(instr[0] == "IF"):
+    if(isIfStmt(instr)):
         if(isinstance(instr[1], bool)):
             if instr[1] == False:
                 return ""
             elif instr[1] == True:
                 return "GOTO " + str(instr[2])
         else:
-            [op, left, right] = instr[1]
-            condition = str(left[1]) + " " + op + " " + str(right[1])
-            return "IF " + condition + " GOTO " + str(instr[2])
+            return "IF " + printExpr(instr[1]) + " GOTO " + str(instr[2])
 
 
 def fetchInstructions(fileName):
@@ -75,16 +75,16 @@ def instanceBasicBlocks(instructions):
 def neutralElimination(instr):
     if(isAssigment(instr) and isBinary(instr[2])):
         res = instr[2]
-        [operator , left, right] = instr[2]
+        [operator, left, right] = instr[2]
         if operator == '+':
-            if(isValue(left,0)):
+            if(isValue(left, 0)):
                 res = right
-            elif (isValue(right,0)):
+            elif (isValue(right, 0)):
                 res = left
         elif operator == '-':
-            if(isValue(right,0)) :
+            if(isValue(right, 0)):
                 res = left
-            elif (isValue(left,0)):
+            elif (isValue(left, 0)):
                 if(isConst(right)):
                     res = ("const", -right[1])
                 elif(isUnary(right)):
@@ -92,46 +92,44 @@ def neutralElimination(instr):
                 elif(isId(right)):
                     res = ("-", right)
         elif operator == '*':
-            if (isValue(left,0) or isValue(right,0)):
+            if (isValue(left, 0) or isValue(right, 0)):
                 res = ('const', 0)
-            elif isValue(left,1):
+            elif isValue(left, 1):
                 res = right
-            elif isValue(right,1):
+            elif isValue(right, 1):
                 res = left
         elif operator == '/':
-            if isValue(right,1):
+            if isValue(right, 1):
                 res = left
-            elif isValue(left,0):
+            elif isValue(left, 0):
                 res = ('const', 0)
         elif operator == '^':
-            if isValue(right,1):
+            if isValue(right, 1):
                 res = left
-            elif isValue(right,0):
-                res = ('const',1)
-            elif isValue(left,1):
-                res = ('const',1)
+            elif isValue(right, 0):
+                res = ('const', 1)
+            elif isValue(left, 1):
+                res = ('const', 1)
         return (instr[0], instr[1], res)
     return instr
 
 
 def constantFolding(instr):
-    '''
-    if(len(tmp) == 3 and len(tmp[1]) == 3):
-        [operator, left, right] = tmp[1]
-        res = tmp[1]
-        if(left[0] == "const" and right[0] == "const"):
+    if(isIfStmt(instr) and isBinary(instr[1])):
+        [operator, left, right] = instr[1]
+        if(isConst(left) and isConst(right)):
             if operator == '>':
-                res = left[1] > right[1]
+                val = left[1] > right[1]
             elif operator == '<':
-                res = left[1] < right[1]
+                val = left[1] < right[1]
             elif operator == '>=':
-                res = left[1] >= right[1]
+                val = left[1] >= right[1]
             elif operator == '<=':
-                res = left[1] <= right[1]
+                val = left[1] <= right[1]
             elif operator == '==':
-                res = left[1] == right[1]
-        return (tmp[0], res, tmp[2])
-    '''
+                val = left[1] == right[1]
+            return (instr[0], val, instr[2])
+
     if(isAssigment(instr) and isBinary(instr[2])):
         [operator, left, right] = instr[2]
         if(isConst(left) and isConst(right)):
@@ -146,6 +144,7 @@ def constantFolding(instr):
             elif operator == '^':
                 val = left[1] ** right[1]
             return (instr[0], instr[1], ("const", val))
+
     return instr
 
 
@@ -177,24 +176,10 @@ def optimizeBlock(block):
 
     for i in range(len(blockInstr)):
         tmp = yacc.parse(blockInstr[i])
-        optimized = constantFolding(tmp)
+        optimized = constantFolding(neutralElimination(tmp))
         optCode = toCode(optimized)
         blockInstr[i] = optCode
-        '''
-        if(tmp[0] == "IF"):
-            #optimized = constantFolding(tmp)
-            #optCode = toCode(optimized)
-            #blockInstr[i] = optCode
-        '''
     return block
-
-
-def isPerfectPower(a, b):
-    while a % b == 0:
-        a = a / b
-    if a == 1:
-        return True
-    return False
 
 
 def main():
@@ -203,5 +188,7 @@ def main():
     blocks = instanceBasicBlocks(instructions)
     for block in blocks:
         print(optimizeBlock(block))
+
+
 if __name__ == "__main__":
     main()
