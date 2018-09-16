@@ -91,7 +91,7 @@ g := 7 * z            => tmp_g := z << 3
 f := f * 33           => tmp_f := f << 5
                          f := tmp_f + f
 ```
-### 5.Constant propagation ( in development ...) 
+### 5. Constant propagation ( in development ...) 
 ```
 x := 3                
 z := z + x            =>    z := z + 3
