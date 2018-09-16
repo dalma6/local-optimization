@@ -9,6 +9,9 @@ class BasicBlock:
     def getInstructions(self):
         return self.instructions
     
+    def setInstructions(self,instructions):
+        self.instructions = instructions
+    
     def getLead(self):
         return self.lead
 

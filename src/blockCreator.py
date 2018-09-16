@@ -152,31 +152,62 @@ def strengthReduction(instr):
     if(isAssigment(instr) and isBinary(instr[2])):
         res = instr[2]
         [operator, left, right] = instr[2]
-        if(isValue(right,2) and operator == "^"):
-            res = ('*', left, left)
+        if(isValue(right, 2) and operator == "^"):
+            return (instr[0], instr[1], ('*', left, left))
         elif(operator == "*"):
-            if(isValue(right,2)):
-                res = ('+', left, left)
-            elif(isValue(left,2)):
-                res = ('+', right, right)
-            elif(isConst(right) and isPerfectPower(right[1], 2) ):
-                res = ('<<', left, ('const', int(math.log(right[1], 2))) )
-            elif(isConst(left) and isPerfectPower(left[1], 2) ):
-                res = ('<<', right, ('const', int(math.log(left[1], 2))) )
-        return (instr[0], instr[1], res)
+            if(isValue(right, 2)):
+                return (instr[0], instr[1], ('+', left, left))
+            elif(isValue(left, 2)):
+                return (instr[0], instr[1], ('+', right, right))
+            elif(isConst(right) and isPerfectPower(right[1], 2)):
+                res = ('<<', left, ('const', int(math.log(right[1], 2))))
+                return (instr[0], instr[1], res)
+            elif(isConst(left) and isPerfectPower(left[1], 2)):
+                res = ('<<', right, ('const', int(math.log(left[1], 2))))
+                return (instr[0], instr[1], res)
+
+            elif(isConst(left) and isPerfectPower(left[1]+1, 2)):
+                res1 = ('<<', right, ('const', int(math.log(left[1]+1, 2))))
+                res2 = ('-', ('id', "tmp_"+instr[1]), ('id', instr[1]))
+                return [(instr[0], "tmp_"+instr[1], res1), (instr[0], instr[1], res2)]
+
+            elif(isConst(right) and isPerfectPower(right[1]+1, 2)):
+                res1 = ('<<', left, ('const', int(math.log(right[1]+1, 2))))
+                res2 = ('-', ('id', "tmp_"+instr[1]), ('id', instr[1]))
+                return [(instr[0], "tmp_"+instr[1], res1), (instr[0], instr[1], res2)]
+
+            elif(isConst(left) and isPerfectPower(left[1]-1, 2)):
+                res1 = ('<<', right, ('const', int(math.log(left[1]-1, 2))))
+                res2 = ('+', ('id', "tmp_"+instr[1]), ('id', instr[1]))
+                return [(instr[0], "tmp_"+instr[1], res1), (instr[0], instr[1], res2)]
+
+            elif(isConst(right) and isPerfectPower(right[1]-1, 2)):
+                res1 = ('<<', left, ('const', int(math.log(right[1]-1, 2))))
+                res2 = ('+', ('id', "tmp_"+instr[1]), ('id', instr[1]))
+                return [(instr[0], "tmp_"+instr[1], res1), (instr[0], instr[1], res2)]
+
     return instr
-    
 
 
 def optimizeBlock(block):
     blockInstr = []
     blockInstr = block.getInstructions()
+    new_blockInstr = []
 
     for i in range(len(blockInstr)):
         tmp = yacc.parse(blockInstr[i])
         optimized = strengthReduction(constantFolding(neutralElimination(tmp)))
-        optCode = toCode(optimized)
-        blockInstr[i] = optCode
+
+        if(isinstance(optimized, list) and len(optimized) == 2):
+            optCode1 = toCode(optimized[0])
+            optCode2 = toCode(optimized[1])
+            new_blockInstr.append(optCode1)
+            new_blockInstr.append(optCode2)
+        else:
+            optCode = toCode(optimized)
+            new_blockInstr.append(optCode)
+
+    block.setInstructions(new_blockInstr)
     return block
 
 
