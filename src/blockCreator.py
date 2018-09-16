@@ -148,26 +148,24 @@ def constantFolding(instr):
     return instr
 
 
-'''
-def strengthReduction(tmp):
-    [operator, left, right] = tmp[3]
-    res = tmp[3]
-    if right[0] == 'const':
-        if operator == '^' and right[1] == 2:
-            operator = '*'
-            right[1] = left[1]
-            res = left[1] * left[1]
-        elif operator == '*' and isPerfectPower(right[1], 2):
-            operator = '<<'
-            right[1] = math.log(right[1], 2)
-        elif operator == '*' and isPerfectPower(right[1], 3):
-            operator = '<<'
-            right[1] = math.log(right[1], 3)
-        tmp[0] = operator
-        tmp[1] = left[1]
-        tmp[2] = right[1]
-        return (tmp[0], tmp[1], tmp[2])
-'''
+def strengthReduction(instr):
+    if(isAssigment(instr) and isBinary(instr[2])):
+        res = instr[2]
+        [operator, left, right] = instr[2]
+        if(isValue(right,2) and operator == "^"):
+            res = ('*', left, left)
+        elif(operator == "*"):
+            if(isValue(right,2)):
+                res = ('+', left, left)
+            elif(isValue(left,2)):
+                res = ('+', right, right)
+            elif(isConst(right) and isPerfectPower(right[1], 2) ):
+                res = ('<<', left, ('const', int(math.log(right[1], 2))) )
+            elif(isConst(left) and isPerfectPower(left[1], 2) ):
+                res = ('<<', right, ('const', int(math.log(left[1], 2))) )
+        return (instr[0], instr[1], res)
+    return instr
+    
 
 
 def optimizeBlock(block):
@@ -176,7 +174,7 @@ def optimizeBlock(block):
 
     for i in range(len(blockInstr)):
         tmp = yacc.parse(blockInstr[i])
-        optimized = constantFolding(neutralElimination(tmp))
+        optimized = strengthReduction(constantFolding(neutralElimination(tmp)))
         optCode = toCode(optimized)
         blockInstr[i] = optCode
     return block
