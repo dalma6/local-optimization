@@ -256,7 +256,6 @@ def main():
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
 
-
     allIntr = []
     for block in blocks:
         optBlock = optimizeBlock(block)
@@ -264,21 +263,17 @@ def main():
         allIntr += optInstructions
     newBlocks = instanceBasicBlocks(allIntr)
 
-
-
-
     for i in range(len(newBlocks)):
         saveBlock = copy.deepcopy(newBlocks[i])
         while(True):
-            otherOptimizations = constantPropagation(optimizeBlock(newBlocks[i]))
+            otherOptimizations = constantPropagation(
+                optimizeBlock(newBlocks[i]))
             if(otherOptimizations.getInstructions() == saveBlock.getInstructions()):
                 break
             saveBlock = copy.deepcopy(otherOptimizations)
 
-        print(otherOptimizations)
+        print(otherOptimizations, end="")
 
-
-    
 
 if __name__ == "__main__":
     main()
