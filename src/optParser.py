@@ -8,6 +8,7 @@ tokens = lexer.tokens
 precedence = (
     ('left', '+', '-'),
     ('left', '*', '/'),
+    ('left', 'LGT'),
     ('left', '^'),
     ('left', 'SHL', 'SHR'),
     ('right', 'UMINUS'),
@@ -19,6 +20,11 @@ names = {}
 def p_program(p):
     'program : statement'
     p[0] = p[1]
+
+
+def p_statement_goto(p):
+    '''statement : GOTO NUMBER'''
+    p[0] = ('IF', True, p[2])
 
 
 def p_statement_if_gotonum(p):
@@ -52,7 +58,8 @@ def p_condition_id(p):
     '''condition : ID LGT NUMBER
                 | ID LGT ID
                 | NUMBER LGT ID
-                | NUMBER LGT NUMBER'''
+                | NUMBER LGT NUMBER
+                '''
 
     try:
         if type(p[1]) is int:

@@ -1,6 +1,7 @@
 import math
 from basicBlock import BasicBlock
 import libraries.yacc as yacc
+import copy
 from indicators import *
 import optParser
 
@@ -8,11 +9,11 @@ import optParser
 def printExpr(expr):
     if(isBinary(expr)):
         return printExpr(expr[1]) + " " + expr[0] + " " + printExpr(expr[2])
-    if(isUnary(expr)):
+    elif(isUnary(expr)):
         return expr[0] + printExpr(expr[1])
-    if(isConst):
+    elif(isConst(expr)):
         return str(expr[1])
-    if(isId):
+    elif(isId(expr)):
         return expr[1]
 
 
@@ -140,9 +141,13 @@ def constantFolding(instr):
             elif operator == '*':
                 val = left[1] * right[1]
             elif operator == '/':
-                val = left[1] / right[1]
+                val = int(left[1] / right[1])
             elif operator == '^':
                 val = left[1] ** right[1]
+            elif operator == '>>':
+                val = left[1] >> right[1]
+            elif operator == '<<':
+                val = left[1] << right[1]
             return (instr[0], instr[1], ("const", val))
 
     return instr
@@ -196,6 +201,7 @@ def optimizeBlock(block):
 
     for i in range(len(blockInstr)):
         tmp = yacc.parse(blockInstr[i])
+
         optimized = strengthReduction(constantFolding(neutralElimination(tmp)))
 
         if(isinstance(optimized, list) and len(optimized) == 2):
@@ -205,19 +211,74 @@ def optimizeBlock(block):
             new_blockInstr.append(optCode2)
         else:
             optCode = toCode(optimized)
-            new_blockInstr.append(optCode)
+            if optCode != "":
+                new_blockInstr.append(optCode)
 
     block.setInstructions(new_blockInstr)
     return block
+
+
+def constantPropagation(block):
+
+    table = {}
+    blockInstr = block.getInstructions()
+    newBlockInstr = []
+
+    for stmt in blockInstr:
+        instr = yacc.parse(stmt)
+        optInstr = constantPropInstr(instr, table)
+        newBlockInstr.append(toCode(optInstr))
+
+    block.setInstructions(newBlockInstr)
+    return block
+
+
+def constantPropInstr(instr, table):
+
+    if isAssigment(instr) and isConst(instr[2]):
+        table[instr[1]] = instr[2][1]
+
+    elif isAssigment(instr):
+        if(isBinary(instr[2])):
+            [operator, left, right] = instr[2]
+            if(isId(left) and left[1] in table.keys()):
+                left = ("const", table[left[1]])
+            if(isId(right) and right[1] in table.keys()):
+                right = ("const", table[right[1]])
+            return (instr[0], instr[1], (operator, left, right))
+        elif(isId(instr[2]) and instr[2][1] in table.keys()):
+            return (instr[0], instr[1], ("const", table[instr[2][1]]))
+    return instr
 
 
 def main():
     fileName = 'test/test_examples/testNeutralElimination.txt'
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
-    for block in blocks:
-        print(optimizeBlock(block))
 
+
+    allIntr = []
+    for block in blocks:
+        optBlock = optimizeBlock(block)
+        optInstructions = optBlock.instructions
+        allIntr += optInstructions
+    newBlocks = instanceBasicBlocks(allIntr)
+
+
+
+
+    for i in range(len(newBlocks)):
+        saveBlock = copy.deepcopy(newBlocks[i])
+        while(True):
+            otherOptimizations = constantPropagation(optimizeBlock(newBlocks[i]))
+            if(otherOptimizations.getInstructions() == saveBlock.getInstructions()):
+                break
+            saveBlock = copy.deepcopy(otherOptimizations)
+
+        print(otherOptimizations)
+
+
+    
 
 if __name__ == "__main__":
     main()

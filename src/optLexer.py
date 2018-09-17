@@ -5,27 +5,30 @@ reserved = (
     'IF',
     'GOTO',
     'IFFALSE'
-    )
+)
 
 tokens = reserved + (
-   'NUMBER',
-   'ID',
-   'ASSIGN',
-   'SHL',
-   'SHR',
-   'LGT'
-) 
+    'NUMBER',
+    'ID',
+    'ASSIGN',
+    'SHL',
+    'SHR',
+    'LGT'
+)
 
-literals = ['=', '+', '-', '*', '/', '(', ')', '^']
+literals = ['=', '+', '-', '*', '/', '(', ')', '^', '<', '>']
+
 
 def t_NUMBER(t):
     r'\d+'
-    t.value = int(t.value)    
+    t.value = int(t.value)
     return t
+
 
 def t_ASSIGN(t):
     r':='
     return t
+
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
@@ -33,29 +36,37 @@ def t_ID(t):
         t.type = t.value
     return t
 
-def t_LGT(t):
-    r'(<=)|(>=)|[<>]|(==)'
-    return t
 
 def t_SHL(t):
     r'<<'
     return t
 
+
 def t_SHR(t):
-    r'<<'
+    r'>>'
     return t
 
+
+def t_LGT(t):
+    r'(<=)|(>=)|(<>)|(==)|[>]|[<]'
+    return t
+
+
 t_ignore = " \t"
+
 
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += t.value.count("\n")
 
 # Leksicka greska bi trebalo da prekine program, zar ne?
+
+
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
-    #t.lexer.skip(1)
+    # t.lexer.skip(1)
     exit()
+
 
 lexer = lex.lex(debug=0)
 
