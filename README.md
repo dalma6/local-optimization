@@ -2,9 +2,10 @@
 
 Local optimizator for 3-adress code.
 
-### :smile: TODO: 
-* uraditi constant propagation
-* uraditi redundatne kalkulacije
+### :exclamation: TODO: 
+* srediti kod
+* brojevi skokova - treba ih azuriati 
+* treba azurirati i cele blokove - jer se broj instrukcija menja i neke nestaju, neke se dodaju (nije obavezno , i sad radi super ) 
 
 ### :book: Code description:
 Local optimizator works for 3-address code that has the following syntax:
@@ -91,12 +92,18 @@ g := 7 * z            => tmp_g := z << 3
 f := f * 33           => tmp_f := f << 5
                          f := tmp_f + f
 ```
-### 5. Constant propagation ( in development ...) 
+### 5. Constant propagation 
+Optimizator performs constant propagation technique on each block 
 ```
 x := 3                
 z := z + x            =>    z := z + 3
+x := 5
+y := x + z            =>    y := 5 + z
 
 ```
+### :repeat: REPEAT 
+These optimizations are runnning in a loop until there is nothing more to optimize
+
 
 ## :wrench: Built Using
 * [PLY - Python Lex-Yacc](https://github.com/dabeaz/ply)
