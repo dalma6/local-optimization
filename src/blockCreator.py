@@ -1,9 +1,12 @@
-import math
 from basicBlock import BasicBlock
-import libraries.yacc as yacc
-import copy
 from indicators import *
+
+import copy
+import math
+
 import optParser
+
+import libraries.yacc as yacc
 
 
 def printExpr(expr):
@@ -49,7 +52,6 @@ def getLeaders(instructions):
 
     for i in range(len(instructions)):
         if(instructions[i].__contains__("GOTO")):
-
             if((i+1) != len(instructions)):
                 leaders.append(instructions[i+1])
             try:
@@ -219,7 +221,6 @@ def optimizeBlock(block):
 
 
 def constantPropagation(block):
-
     table = {}
     blockInstr = block.getInstructions()
     newBlockInstr = []
@@ -234,7 +235,6 @@ def constantPropagation(block):
 
 
 def constantPropInstr(instr, table):
-
     if isAssigment(instr) and isConst(instr[2]):
         table[instr[1]] = instr[2][1]
 
@@ -271,7 +271,6 @@ def main():
             if(otherOptimizations.getInstructions() == saveBlock.getInstructions()):
                 break
             saveBlock = copy.deepcopy(otherOptimizations)
-
         print(otherOptimizations, end="")
 
 

@@ -1,6 +1,5 @@
 import libraries.yacc as yacc
 import optLexer as lexer
-# from ArithmeticError import ZeroDivisionError
 
 
 tokens = lexer.tokens

@@ -59,33 +59,10 @@ def t_newline(t):
     r'\n+'
     t.lexer.lineno += t.value.count("\n")
 
-# Leksicka greska bi trebalo da prekine program, zar ne?
-
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
-    # t.lexer.skip(1)
     exit()
 
 
 lexer = lex.lex(debug=0)
-
-test_data = '''
-a_1 := x + y 
-IFFALSE x GOTO 4
-b := 3 - y 
-c := 2 * y 
-IF c > 0 GOTO 9
-d := a + c'''
-
-'''
-lexer.input(test_data)
-
-Gde cemo ovde proveriti da li je ulaz ispravan i zvati gresku?
-while True:
-    tok = lexer.token()
-    if not tok: 
-        break     
-    print(tok)
-
-'''
