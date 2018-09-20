@@ -248,11 +248,15 @@ def constantPropInstr(instr, table):
             return (instr[0], instr[1], (operator, left, right))
         elif(isId(instr[2]) and instr[2][1] in table.keys()):
             return (instr[0], instr[1], ("const", table[instr[2][1]]))
+        elif(isUnary(instr[2])):
+            left = instr[2][1]
+            if(isId(left) and left[1] in table.keys()):
+                return (instr[0],instr[1], ('const',(-1) * table[left[1]]))
     return instr
 
 
 def main():
-    fileName = 'test/test_examples/testNeutralElimination.txt'
+    fileName = 'test/test_examples/test.txt'
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
 

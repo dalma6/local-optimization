@@ -111,3 +111,5 @@ venv.bak/
 # Library
 *.out
 parsetab.py
+
+~.*
