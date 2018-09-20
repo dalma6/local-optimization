@@ -1,28 +1,24 @@
 # Local optimization 
 
-Local optimizator for 3-adress code.
-
-### :exclamation: TODO: 
-* srediti kod
-* brojevi skokova - treba ih azuriati 
-* treba azurirati i cele blokove - jer se broj instrukcija menja i neke nestaju, neke se dodaju (nije obavezno , i sad radi super ) 
+Local optimizator for 3-adress code that is in SSA format. Optimizator supports neutral elimination, constant folding, constant propagation and strenght reduction and runs those optimizations in a loop as long as there is something to optimize.
 
 ### :book: Code description:
 Local optimizator works for 3-address code that has the following syntax:
-1. The language consists of declarations and IF / GOTO statements
+1. The language consists of declarations and IF / GOTO statements ( GOTO must go to some number ).
+2. Code must be in SSA (Single Static Assigment) format ( 1 declaration per variable )
 2. Operators that are supported : 
 
       | + | - | * | / | >> | << |- (unary)|
       |---|---|---|---|----|----|---------|
 
  ```
-x := 7
-IF x < 5 GOTO 5
-y := x * 8
-x := y ^ 2
-x := x + x
+x1 := 7
+IF x1 < 5 GOTO 5
+y := x1 * 8
+x2 := y ^ 2
+x3 := x2 + x2
 z := 2 + 3
-t := -x * 2
+t := -x1 * 2
 ```
 
 # :computer: Optimization techniques
@@ -30,15 +26,15 @@ Local optimizator optimizes the code described above using the following steps
 ### 1. Basic block generator
 Optimizator splits the code into basic blocks by finding _leader instructions_
 ```
-x := 7
-IF x < 5 GOTO 5
+x1 := 7
+IF x1 < 5 GOTO 5
 --------------
-y := x * 8
-x := y ^ 2
+y := x1 * 8
+x2 := y ^ 2
 --------------
-x := x + x
+x3 := x2 + x2
 z := 2 + 3
-t := -x * 2
+t := -x1 * 2
 ```
 ### 2. Neutral elimination
 Optimizator performs neutral elimination technique on each block
@@ -103,7 +99,6 @@ y := x + z            =>    y := 5 + z
 ```
 ### :repeat: REPEAT 
 These optimizations are runnning in a loop until there is nothing more to optimize
-
 
 ## :wrench: Built Using
 * [PLY - Python Lex-Yacc](https://github.com/dabeaz/ply)
