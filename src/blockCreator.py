@@ -3,6 +3,7 @@ from indicators import *
 
 import copy
 import math
+import sys
 
 import optParser
 
@@ -256,7 +257,14 @@ def constantPropInstr(instr, table):
 
 
 def main():
-    fileName = 'test/test_examples/test.txt'
+    if(len(sys.argv) == 1):
+        fileName = 'test/test_examples/test.txt'
+    elif(len(sys.argv) == 2):
+        fileName = sys.argv[1]
+    else:
+        print("Usage: python3 blockCreator.py [path_to_file]")
+        return
+
     instructions = fetchInstructions(fileName)
     blocks = instanceBasicBlocks(instructions)
 
