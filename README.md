@@ -21,6 +21,15 @@ z := 2 + 3
 t := -x1 * 2
 ```
 
+### :joystick: Usage
+Run the following command 
+```
+$ python3 blockCreator.py [path_to_file]
+```
+
+If path to file is not stated program uses test/test_examples/test.txt file that consists of instructions
+that demonstrate how each local optimization technique works and how they work together in a loop.
+
 # :computer: Optimization techniques
 Local optimizator optimizes the code described above using the following steps 
 ### 1. Basic block generator
@@ -57,8 +66,7 @@ t := t / 1          => t := t
 
 z := z ^ 0          => z := 1
 z := z ^ 1          => z := z
-z := 1 ^ 5          => z := 1
-
+z := 1 ^ 5          => z := 
 ````
 ###  3. Constant folding
 Optimizator performs constant folding technique on each instruction after neutral elimination
@@ -110,4 +118,4 @@ These optimizations are runnning in a loop until there is nothing more to optimi
 
 ## :book: License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details
